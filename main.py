@@ -1,6 +1,6 @@
-
 from extractBook import extract_book
 from extractCat import extract_category
+from extractAll import extract_all
 
 
 list_choice = {
@@ -74,7 +74,7 @@ elif choix == 2:
     cat_url = "http://books.toscrape.com/catalogue/category/books/" + find_cat(str(choice)) + "/index.html"
     extract_category(cat_url)
 elif choix == 3:
-    pass
+    extract_all()
 else:
     print("erreur de choix")
 
