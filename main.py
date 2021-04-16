@@ -63,17 +63,26 @@ def find_cat(v):
             return val
 
 
-print("Que voulez-vous extraire ?\n\nLivre : Taper 1\nCatégorie : Taper 2\nSite complet : Taper 3\n")
+print("Que voulez-vous extraire ?\n\nLivre : Taper 1\nCatégorie : Taper 2\nSite complet : Taper 3\nQuitter App: Taper 4\n")
 choix = int(input("Votre choix : "))
 
-if choix == 1:
-    url = input("Indiquez l'url du livre : ")
-    extract_book(url)
-elif choix == 2:
-    choice = input("Indiquez la categorie :" + '\n')
-    cat_url = "http://books.toscrape.com/catalogue/category/books/" + find_cat(str(choice)) + "/index.html"
-    extract_category(cat_url)
-elif choix == 3:
-    extract_all()
-else:
-    print("erreur de choix")
+while choix != 4:
+    if choix == 1:
+        url = input("Indiquez l'url du livre : ")
+        extract_book(url)
+        print("Extraction terminée - Merci\n")
+    elif choix == 2:
+        choice = input("Indiquez la categorie :" + '\n')
+        cat_url = "http://books.toscrape.com/catalogue/category/books/" + find_cat(str(choice)) + "/index.html"
+        extract_category(cat_url)
+        print("Extraction terminée - Merci\n")
+    elif choix == 3:
+        extract_all()
+        print("Extraction terminée - Merci\n")
+    elif choix == 4:
+        break
+    else:
+        print("Mauvais choix - Merci de saisir un chiffre entre 1 et 4")
+        pass
+
+    choix = int(input("Votre choix : "))
