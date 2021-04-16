@@ -77,5 +77,3 @@ elif choix == 3:
     extract_all()
 else:
     print("erreur de choix")
-
-# https://books.toscrape.com/catalogue/chase-me-paris-nights-2_977/index.html
