@@ -2,6 +2,11 @@ from extractBook import extract_book
 from extractCat import extract_category
 from extractAll import extract_all
 
+"""
+======================================================================
+Interface utilisateur qui permettra de savoir ce qui doit être extrait
+======================================================================
+"""
 
 list_choice = {
     "Travel": "travel_2",
@@ -56,6 +61,13 @@ list_choice = {
     "Crime": "crime_51"
 }
 
+""" 
+
+Permet de trouver la portion d'url de la catégorie demandée par l'utilisateur 
+à l'aide du dictionnaire list_choice
+
+"""
+
 
 def find_cat(v):
     for k, val in list_choice.items():
@@ -63,9 +75,20 @@ def find_cat(v):
             return val
 
 
-print("Que voulez-vous extraire ?\n\nLivre : Taper 1\nCatégorie : Taper 2\nSite complet : Taper 3\nQuitter App: Taper 4\n")
-choix = int(input("Votre choix : "))
+print(
+    "Que voulez-vous extraire ?\n\nLivre : Taper 1\nCatégorie : Taper 2\nSite complet : Taper 3\nQuitter App: Taper 4\n")
 
+choix = 0
+
+""" Contrôle que l'utilisateur renseigne bien un choix en int sinon demande à celui-ci de recommencer """
+while not choix:
+    try:
+        choix = int(input("Votre choix : "))
+    except ValueError:
+        print("Mauvais choix - Merci de saisir un chiffre entre 1 et 4")
+        pass
+
+""" Le choix est entre 1 et 4 - en fonction va déterminer la suite du programme """
 while choix != 4:
     if choix == 1:
         url = input("Indiquez l'url du livre : ")
@@ -81,8 +104,5 @@ while choix != 4:
         print("Extraction terminée - Merci\n")
     elif choix == 4:
         break
-    else:
-        print("Mauvais choix - Merci de saisir un chiffre entre 1 et 4")
-        pass
 
     choix = int(input("Votre choix : "))
