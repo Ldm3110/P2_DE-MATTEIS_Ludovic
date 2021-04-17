@@ -111,10 +111,9 @@ def extract_book(url_enter):
                 writer.writerow(elem)
 
 
-"""
 
+"""
 ''' url utilisé pour le test '''
 url = "https://books.toscrape.com/catalogue/libertarianism-for-beginners_982/index.html"
 extract_book(url)
-
 """
