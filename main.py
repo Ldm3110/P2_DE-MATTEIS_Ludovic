@@ -105,4 +105,5 @@ while choix != 4:
     elif choix == 4:
         break
 
+    """ La première extraction est terminée - l'user peut choisir d'en faire une autre sinon il peut quitter le programme """
     choix = int(input("Votre choix : "))
