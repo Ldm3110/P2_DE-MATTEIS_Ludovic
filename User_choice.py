@@ -1,5 +1,5 @@
-# from Book_extractor import extract_book
 from Category_extractor import *
+from Book_extractor import extract_book
 
 """
 ======================================================================
@@ -89,9 +89,13 @@ def choose_extract(choix):
     :return: rien, le résultat sera les folders présents sur le poste de travail de l'user
     '''
     if choix == 1:
+        book = []
         url = input("Indiquez l'url du livre : ")
-        extract_book(url)
+        book.append(url)
+        extract_book(book)
         print("Extraction terminée - Merci\n")
+        choix = 0
+        user_enter_choice(choix)
     elif choix == 2:
         try:
             ch_cat = str(input("Indiquez la categorie :" + '\n'))
