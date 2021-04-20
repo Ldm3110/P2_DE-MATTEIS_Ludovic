@@ -60,8 +60,6 @@ cat_books = [
     "Crime"
 ]
 
-""" Le choix est entre 1 et 4 - en fonction va déterminer la suite du programme """
-
 
 def user_enter_choice(choix):
     '''
@@ -124,7 +122,6 @@ print(
     "Site complet : Taper 3\n"
     "Quitter App: Taper 4\n")
 
-""" Contrôle que l'utilisateur renseigne bien un choix en int sinon demande à celui-ci de recommencer """
 
 choix = 0
 user_enter_choice(choix)
