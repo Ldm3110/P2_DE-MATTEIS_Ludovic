@@ -1,6 +1,6 @@
 import requests
 from bs4 import BeautifulSoup
-from Book_extractor import extract_book
+from Book_extractor import write_book
 
 """
 =============================================
@@ -107,8 +107,12 @@ def nb_pages(url):
     :return: liste dans laquelle il y aura toutes les urls des livres de la catégorie
     '''
     urls[:] = []
+    request = requests.get(url)
+    if request.ok:
+        extract = BeautifulSoup(request.text, 'html.parser')
+        category = extract.find('ul').findAll('li')[2].text.strip()
     urls_in_cat = extract_books_in_cat(url)
-    extract_book(urls_in_cat)
+    write_book(urls_in_cat, category)
 
 
 def extract_url_category(choix):

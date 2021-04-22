@@ -1,5 +1,6 @@
 from Category_extractor import *
 from Book_extractor import extract_book
+from Website_extractor import extract_all_cat
 
 """
 ======================================================================
@@ -109,7 +110,10 @@ def choose_extract(choix):
         except ValueError:
             print("Mauvaise catégorie - Que souhaitez-vous extraire")
     elif choix == 3:
-        pass  # Pas fonctionnel actuellement
+        extract_all_cat("https://books.toscrape.com/index.html")
+        print("Extraction terminée - Merci\n")
+        choix = 0
+        user_enter_choice(choix)
     elif choix == 4:
         print("Merci à bientôt")
         SystemExit(0)

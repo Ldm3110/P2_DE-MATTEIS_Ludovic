@@ -1,18 +1,15 @@
+import time
 from bs4 import BeautifulSoup
 import requests
 import csv
 import os
+from tqdm import tqdm
 
 '''
 ==================================================
 Extraction des différentes informations des livres
 ==================================================
 '''
-
-dict_final = []
-labels = ['product_page_url', 'universal_product_code (upc)', 'title', 'price_including_tax',
-          'price_excluding_tax',
-          'number_available', 'product_description', 'category', 'review_rating', 'image_url']
 
 
 def convert_description(div, extract):
@@ -67,58 +64,101 @@ def dl_image(url_img, titre, categorie):
         os.mkdir('./Catégorie(s)/' + categorie + '/Book_Cover')
     else:
         pass
+    title_img = titre.replace('/', '-')
     reponse = requests.get(url_img)
-    f = open('./Catégorie(s)/' + categorie + '/Book_Cover/' + titre + '.jpg', 'wb')
+    f = open('./Catégorie(s)/' + categorie + '/Book_Cover/' + title_img + '.jpg', 'wb')
     f.write(reponse.content)
     f.close()
 
 
-def extract_book(listing):
-    for elem in listing:
-        """ extraction of all categories """
-        dict_book = {'product_page_url': '', 'universal_product_code (upc)': '', 'title': 'title',
-                     'price_including_tax': '',
-                     'price_excluding_tax': '', 'number_available': '',
-                     'product_description': '', "category": '', 'review_rating': '',
-                     'image_url': ''}
-        extract = requests.get(elem)
-        if extract.ok:
-            soup = BeautifulSoup(extract.text, 'html.parser')
-            dict_book['product_page_url'] = elem
-            dict_book['title'] = soup.find('h1').text
-            tr = soup.findAll('tr')
-            dict_book['universal_product_code (upc)'] = tr[0].find('td').text
-            dict_book['price_including_tax'] = tr[2].find('td').text.replace('Â£', '£')
-            dict_book['price_excluding_tax'] = tr[3].find('td').text.replace('Â£', '£')
-            dict_book['number_available'] = tr[5].find('td').text
-            div = soup.find('div', {'id': 'product_description'})
-            dict_book['product_description'] = convert_description(div, extract)
-            dict_book['review_rating'] = convert_rating_string(soup.findAll("p")[2]["class"][1])
-            dict_book['category'] = soup.find('ul').findAll('li')[2].text.strip()
-            img = soup.find('div', {'class': 'item active'}).find('img')
-            dict_book['image_url'] = extract_img(img)
-            dict_final.append(dict_book)
+def extract_book(book_url):
+    """ extraction of all categories """
+    extract = requests.get(book_url)
+    if extract.ok:
+        soup = BeautifulSoup(extract.text, 'html.parser')
+        product_page_url = book_url
+        tr = soup.findAll('tr')
+        universal_product_code = tr[0].find('td').text
+        title = soup.find('h1').text
+        price_including_tax = tr[2].find('td').text.replace('Â£', '£')
+        price_excluding_tax = tr[3].find('td').text.replace('Â£', '£')
+        number_available = tr[5].find('td').text
+        div = soup.find('div', {'id': 'product_description'})
+        product_description = convert_description(div, extract)
+        review_rating = convert_rating_string(soup.findAll("p")[2]["class"][1])
+        category = soup.find('ul').findAll('li')[2].text.strip()
+        img = soup.find('div', {'class': 'item active'}).find('img')
+        image_url = extract_img(img)
 
-            '''Création du dossier qui recevra les différentes catégories'''
-            if not os.path.isdir('./Catégorie(s)'):
-                os.mkdir('./Catégorie(s)')
-            else:
-                pass
+        dl_image(image_url, title, category)
+        return (product_page_url,
+                universal_product_code,
+                title, price_including_tax,
+                price_excluding_tax,
+                number_available,
+                product_description,
+                review_rating,
+                category,
+                image_url)
 
-            '''Création d'un dossier livre si celui-ci n'existe pas déjà'''
-            if not os.path.isdir('./Catégorie(s)/' + dict_book['category']):
-                os.mkdir('./Catégorie(s)/' + dict_book['category'])
-            else:
-                pass
 
-            dl_image(dict_book['image_url'], dict_book['title'], dict_book['category'])
+def write_book(listing, categorie):
+    '''
+    Reçoit les informations de chaque livre 1b1 et l'écrit dans le csv correspondant à sa catégorie
+    :param listing: dict contenant toutes les informations du livre
+    :return: rien - écriture dans un fichier csv
+    '''
 
-            ''' Create the .csv file  '''
-            with open('./Catégorie(s)/' + dict_book['category'] + '/Book(s)_' + dict_book['category'] + '.csv', 'w',
-                      encoding='utf-8') as csvfile:
-                writer = csv.DictWriter(csvfile, dialect='excel', fieldnames=labels)
-                ''' Writing the header on .csv file'''
-                writer.writeheader()
-                '''Writing all the line on .csv file'''
-                for elem in dict_final:
-                    writer.writerow(elem)
+    '''Création du dossier qui recevra les différentes catégories'''
+    if not os.path.isdir('./Catégorie(s)'):
+        os.mkdir('./Catégorie(s)')
+    else:
+        pass
+
+    '''Création d'un dossier livre si celui-ci n'existe pas déjà'''
+    if not os.path.isdir('./Catégorie(s)/' + categorie):
+        os.mkdir('./Catégorie(s)/' + categorie)
+    else:
+        pass
+
+    with open('./Catégorie(s)/' + categorie + '/Book(s)_' + categorie + '.csv', 'w',
+              encoding='utf-8') as csvfile:
+        writer = csv.writer(csvfile, dialect='excel')
+
+        ''' Writing the header on .csv file'''
+        writer.writerow(
+            ["product_page_url", "universal_ product_code (upc)", "title", "price_including_tax",
+             "price_excluding_tax",
+             "number_available", "product_description", "category", "review_rating", "image_url"])
+
+        '''Writing all the line on .csv file'''
+        print("Extraction de(s) " + str(len(listing)) + " livre(s) de la catégorie " + categorie)
+        time.sleep(0.5)
+
+        for product_page_url in listing:
+            for i in tqdm(range(len(listing)), ncols=0):
+                # récupération des donnés de livre
+                (product_page_url,
+                 universal_product_code,
+                 title, price_including_tax,
+                 price_excluding_tax,
+                 number_available,
+                 product_description,
+                 review_rating,
+                 category,
+                 image_url) = extract_book(product_page_url)
+                dl_image(image_url, title, category)
+
+                # write row with books data
+                writer.writerow([
+                    product_page_url,
+                    universal_product_code,
+                    title, price_including_tax,
+                    price_excluding_tax,
+                    number_available,
+                    product_description,
+                    review_rating,
+                    category,
+                    image_url
+                ])
+    print("")
