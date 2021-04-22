@@ -134,9 +134,9 @@ def write_book(listing, categorie):
         '''Writing all the line on .csv file'''
         print("Extraction de(s) " + str(len(listing)) + " livre(s) de la catégorie " + categorie)
         time.sleep(0.5)
-
+        compteur = 1
         for product_page_url in listing:
-            for i in tqdm(range(len(listing)), ncols=0):
+            for i in tqdm(range(1), ncols=0, desc="livre " + str(compteur)):
                 # récupération des donnés de livre
                 (product_page_url,
                  universal_product_code,
@@ -161,4 +161,5 @@ def write_book(listing, categorie):
                     category,
                     image_url
                 ])
+                compteur +=1
     print("")
