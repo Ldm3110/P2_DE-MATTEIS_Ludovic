@@ -124,3 +124,19 @@ def extract_url_category(choix):
     '''
     cat_url = "http://books.toscrape.com/catalogue/category/books/" + find_cat(choix) + "/index.html"
     nb_pages(cat_url)
+
+
+def extract_one_book(url_book):
+    '''
+    Reçoit l'url du livre lors de l'extraction d'un seul livre via User_choice.py et extrait la catégorie avant
+    d'envoyer cette url et la catégorie à write_book
+    :param url_book: url du livre
+    :return: rien - les informations sont transmises à write_book
+    '''
+    book = []
+    book.append(url_book)
+    ext_cat_book = requests.get(url_book)
+    if ext_cat_book.ok:
+        extract = BeautifulSoup(ext_cat_book.text, 'html.parser')
+        category = extract.find('ul').findAll('li')[2].text.strip()
+    write_book(book, category)

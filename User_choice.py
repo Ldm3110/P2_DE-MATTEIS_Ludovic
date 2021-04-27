@@ -91,7 +91,7 @@ def choose_extract(choix):
         book = []
         url = input("Indiquez l'url du livre : ")
         book.append(url)
-        extract_book(book)
+        extract_one_book(url)
         print("Extraction terminée - Merci\n")
         choix = 0
         user_enter_choice(choix)
