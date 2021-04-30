@@ -1,9 +1,12 @@
+# -*- coding: utf-8 -*-
+
 import time
 from bs4 import BeautifulSoup
 import requests
 import csv
 import os
-from tqdm import tqdm
+
+from progress.bar import Bar, IncrementalBar
 
 '''
 ==================================================
@@ -19,7 +22,7 @@ def convert_description(div, extract):
     :param extract: résultat du request sur l'url du site
     :return: description sinon "no description"
     '''
-    soup = BeautifulSoup(extract.text, "html.parser")
+    soup = BeautifulSoup(extract.content, "html.parser")
     if div:
         return soup.select('article > p')[0].text.replace(',', '')
     else:
@@ -64,22 +67,20 @@ def dl_image(url_img, titre, categorie):
         os.mkdir('./Catégorie(s)/' + categorie + '/Book_Cover')
     else:
         pass
-    title_img = titre.replace('/', '-')
     reponse = requests.get(url_img)
-    f = open('./Catégorie(s)/' + categorie + '/Book_Cover/' + title_img + '.jpg', 'wb')
-    f.write(reponse.content)
-    f.close()
+    img = url_img.replace('http://books.toscrape.com/media/cache/', '').replace('/', '_')
+    open('./Catégorie(s)/' + categorie + '/Book_Cover/' + img, 'wb').write(reponse.content)
 
 
 def extract_book(book_url):
     """ extraction of all categories """
     extract = requests.get(book_url)
     if extract.ok:
-        soup = BeautifulSoup(extract.text, 'html.parser')
+        soup = BeautifulSoup(extract.content, 'html.parser')
         product_page_url = book_url
         tr = soup.findAll('tr')
         universal_product_code = tr[0].find('td').text
-        title = soup.find('h1').text
+        title = soup.find('h1').text.replace(':', '-').replace('/', '-').replace('"', '')
         price_including_tax = tr[2].find('td').text.replace('Â£', '£')
         price_excluding_tax = tr[3].find('td').text.replace('Â£', '£')
         number_available = tr[5].find('td').text
@@ -90,15 +91,14 @@ def extract_book(book_url):
         img = soup.find('div', {'class': 'item active'}).find('img')
         image_url = extract_img(img)
 
-        dl_image(image_url, title, category)
         return (product_page_url,
                 universal_product_code,
                 title, price_including_tax,
                 price_excluding_tax,
                 number_available,
                 product_description,
-                review_rating,
                 category,
+                review_rating,
                 image_url)
 
 
@@ -134,9 +134,8 @@ def write_book(listing, categorie):
         '''Writing all the line on .csv file'''
         print("Extraction de(s) " + str(len(listing)) + " livre(s) de la catégorie " + categorie)
         time.sleep(0.5)
-        compteur = 1
-        for product_page_url in listing:
-            for i in tqdm(range(1), ncols=0, desc="livre " + str(compteur)):
+        with IncrementalBar('Récupération des données', max=len(listing)) as bar:
+            for product_page_url in listing:
                 # récupération des donnés de livre
                 (product_page_url,
                  universal_product_code,
@@ -144,8 +143,8 @@ def write_book(listing, categorie):
                  price_excluding_tax,
                  number_available,
                  product_description,
-                 review_rating,
                  category,
+                 review_rating,
                  image_url) = extract_book(product_page_url)
                 dl_image(image_url, title, category)
 
@@ -157,9 +156,13 @@ def write_book(listing, categorie):
                     price_excluding_tax,
                     number_available,
                     product_description,
-                    review_rating,
                     category,
+                    review_rating,
                     image_url
                 ])
-                compteur +=1
+                bar.next()
+            '''s = open('./Catégorie(s)/' + categorie + '/Book(s)_' + categorie + '.csv', 'r',
+                     encoding='utf-8').read()
+            open('./Catégorie(s)/' + categorie + '/Book(s)_' + categorie + '2.csv', 'w',
+                 encoding='utf-8-sig').write(s)'''
     print("")
